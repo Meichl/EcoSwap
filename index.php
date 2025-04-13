@@ -36,7 +36,8 @@
             <div class="container">
                 <div class="hero-content">
                     <h2>Troque, Reutilize, Sustente</h2>
-                    <p>Troque itens que você não usa mais por coisas que precisa. Ajude o planeta reduzindo o desperdício.</p>
+                    <p>Troque itens que você não usa mais por coisas que precisa. Ajude o planeta reduzindo o
+                        desperdício.</p>
                     <div class="search-container">
                         <input type="text" id="search-input" placeholder="Buscar itens...">
                         <button id="search-button"><i class="fas fa-search"></i></button>
