@@ -3,7 +3,7 @@ import { UserComponent } from './components/User.js';
 
 const state = {
     currentUser: null,
-    item: [],
+    items: [],
     filteredItems: [],
     currentCategory: null,
     currentCondition: null,
@@ -51,13 +51,13 @@ function init() {
 
 async function checkAuthStatus() {
     try {
-        const responde = await fetch(API.users, {
+        const response = await fetch(API.users, {
             method: 'GET',
             credentials: 'include'
         });
 
-        if (responde.ok) {
-            const userData = await responde.json();
+        if (response.ok) {
+            const userData = await response.json();
             state.currentUser = userData;
             updateAuthUI();
             elements.addItemBtn.classList.remove('hidden');
@@ -101,11 +101,14 @@ async function loadItems() {
         let endpoint = API.items;
 
         if (state.currentCategory) {
+            endpoint += `&action=category&category=${state.currentCategory}`;
+        }
+        if (state.searchQuery) {
             endpoint += `&action=search&q=${state.searchQuery}`;
         }
 
-        const responde = await fetch(endpoint);
-        const items = await responde.json();
+        const response = await fetch(endpoint);
+        const items = await response.json();
 
         state.items = items;
 
@@ -276,7 +279,7 @@ async function deleteItem(itemId) {
             credentials: 'include'
         });
 
-        if (responde.ok) {
+        if (response.ok) {
             closeModal(elements.itemDetailsModal);
             loadItems();
             showNotification('Item excluído com sucesso', 'success');
@@ -376,5 +379,73 @@ async function getUserItems(userId){
     } catch (error) {
         console.error('Erro ao obter itens do usuário:', error);
         return;
+    }
+}
+
+async function submiteSwapProposal(itemId, userId, ownerId){
+    try {
+        const response = await fetch ('api/index.php?route=swaps', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                item_id: itemId,
+                user_item_id: userItemId,
+                owner_id: ownerId
+            }),
+            credentials: 'include'
+        });
+
+        if (response.ok){
+            closeModal(elements.itemDetailsModal);
+            showNotification('Proposta de troca enviada com sucesso!', 'success');
+        } else {
+            const error = await response.json();
+            showNotification(error.message || 'Erro ao enviar proposta de troca', 'error');
+        }
+    } catch (error){
+        console.error('Erro ao enviar proposta de troca', error);
+        showNotification('Erro ao enviar proposta de troca. Tente novamente.', error);
+    }
+}
+
+async function handleLogin(e){
+    e.preventDefault();
+
+    const email = document.getElementById('login-email').value;
+    const password = document.getElementById('login-password').value;
+
+    if (!email || !password){
+        showNotification('Por favor, preencha todos os campos', error);
+        return;
+    }
+
+    try{
+        const response = await fetch(API.login, {
+            method: 'POST',
+            headers: {
+                'Content-Type':'application/json'
+            },
+            body: JSON.stringify({email, password}),
+            credentials: 'include'
+        });
+
+        if (response.ok){
+            const userData = await response.json();
+            state.currentUser = userData;
+
+            closeModal(elements.loginModal);
+            updateAuthUI();
+            showNotification('Login realizado com sucesso', 'success');
+
+            elements.addItemBtn.classList.remove('hidden');
+        } else {
+            const error = await response.json();
+            showNotification(error.message || 'Email ou senha incorretos', 'error');
+        }
+    } catch (error) {
+        console.error('Erro ao fazer login:', error);
+        showNotification('Error ao fazer login. Tente novamente.', 'error');
     }
 }
