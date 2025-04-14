@@ -364,14 +364,14 @@ function proposeSwap(item) {
     });
 }
 
-async function getUserItems(userId){
+async function getUserItems(userId) {
     try {
         const response = await fetch(`${API.items}&action=user&user_id=${userId}`, {
             method: 'GET',
             credentials: 'include'
         });
-        
-        if (response.ok){
+
+        if (response.ok) {
             return await response.json();
         } else {
             return [];
@@ -382,9 +382,9 @@ async function getUserItems(userId){
     }
 }
 
-async function submiteSwapProposal(itemId, userId, ownerId){
+async function submiteSwapProposal(itemId, userId, ownerId) {
     try {
-        const response = await fetch ('api/index.php?route=swaps', {
+        const response = await fetch('api/index.php?route=swaps', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -397,41 +397,41 @@ async function submiteSwapProposal(itemId, userId, ownerId){
             credentials: 'include'
         });
 
-        if (response.ok){
+        if (response.ok) {
             closeModal(elements.itemDetailsModal);
             showNotification('Proposta de troca enviada com sucesso!', 'success');
         } else {
             const error = await response.json();
             showNotification(error.message || 'Erro ao enviar proposta de troca', 'error');
         }
-    } catch (error){
+    } catch (error) {
         console.error('Erro ao enviar proposta de troca', error);
         showNotification('Erro ao enviar proposta de troca. Tente novamente.', error);
     }
 }
 
-async function handleLogin(e){
+async function handleLogin(e) {
     e.preventDefault();
 
     const email = document.getElementById('login-email').value;
     const password = document.getElementById('login-password').value;
 
-    if (!email || !password){
+    if (!email || !password) {
         showNotification('Por favor, preencha todos os campos', error);
         return;
     }
 
-    try{
+    try {
         const response = await fetch(API.login, {
             method: 'POST',
             headers: {
-                'Content-Type':'application/json'
+                'Content-Type': 'application/json'
             },
-            body: JSON.stringify({email, password}),
+            body: JSON.stringify({ email, password }),
             credentials: 'include'
         });
 
-        if (response.ok){
+        if (response.ok) {
             const userData = await response.json();
             state.currentUser = userData;
 
@@ -449,3 +449,286 @@ async function handleLogin(e){
         showNotification('Error ao fazer login. Tente novamente.', 'error');
     }
 }
+
+async function handleRegister(e) {
+    e.preventDefault();
+
+    const name = document.getElementById('register-name').value;
+    const email = document.getElementById('register-email').value;
+    const password = document.getElementById('register-password').value;
+    const confirmPassword = document.getElementById('register-confirm-password').value;
+
+    if (!name || !email || !password || !confirmPassword) {
+        showNotification('Por favor, preencha todos os campos', 'error');
+        return;
+    }
+
+    if (password !== confirmPassword) {
+        showNotification('As senhas não coincidem', 'error');
+        return;
+    }
+
+    try {
+        const response = await fetch(API.register, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ name, email, password }),
+            credentials: 'include'
+        });
+
+        if (response.ok) {
+            const userData = await response.json();
+            state.currentUser = userData;
+
+            closeModal(elements.registerForm);
+            updateAuthUI();
+            showNotification('Registro realizado com sucesso', 'success');
+
+            elements.addItemBtn.classList.remove('hidden');
+        } else {
+            const error = await response.json();
+            showNotification(error.message || 'Erro ao realizar registro', 'error');
+        }
+    } catch (error) {
+        console.error('Erro ao fazer registro:', error);
+        showNotification('Erro ao fazer registro. Tente novamente', 'error');
+    }
+}
+
+async function handleLogout() {
+    try {
+        const response = await fetch(API.logout, {
+            method: 'POST',
+            credentials: 'include'
+        });
+
+        if (response.ok) {
+            state.currentUser = null;
+
+            updateAuthUI();
+            showNotification('Logout realizado com sucesso', 'success');
+            elements.addItemBtn.classList.add('hidden');
+        } else {
+            const error = await response.json();
+            showNotification(error.message || 'Erro ao realizar logout', 'error');
+        }
+    } catch (error) {
+        console.error('Erro ao fazer logout:', error);
+        showNotification('Erro ao fazer logout. Tente novamente', 'error');
+    }
+}
+
+async function handleAddEditItem(e) {
+    e.preventDefault();
+    const itemId = document.getElementById('item-id').value;
+    const name = document.getElementById('item-name').value;
+    const description = document.getElementById('item-description').value;
+    const category = document.getElementById('item-category').value;
+    const condition = document.getElementById('item-condition').value;
+    const imageInput = document.getElementById('item-image');
+
+    if (!name || !description || !category || !condition) {
+        showNotification('Por favor, preencha todos os campos', 'error');
+        return;
+    }
+
+    const formData = new FormData();
+    formData.append('name', name);
+    formData.append('description', description);
+    formData.append('category', category);
+    formData.append('condition', condition);
+
+    if (imageInput.files.lenght > 0) {
+        formData.append('image', imageInput.files[0]);
+    }
+    if (itemId) {
+        formData.append('id', itemId);
+    }
+
+    try {
+        const action = itemId ? 'update' : 'create';
+        const response = await fetch(`${API.items}&action=${action}`, {
+            method: 'POST',
+            body: formData,
+            credentials: 'include'
+        });
+
+        if (response.ok) {
+            closeModal(elements.addItemModal);
+            elements.addItemForm.reset();
+            document.getElementById('image-preview').innerHTML = '';
+            document.getElementById('image-preview').classList.add('hidden');
+            loadItems();
+
+            const message = itemId ? 'Item atualizado com sucesso' : 'Item adicionado com sucesso';
+            showNotification(message, 'success');
+        } else {
+            const error = await response.json();
+            showNotification(error.message || 'Erro ao adicionar/atualizar item', 'error');
+        }
+    } catch (error) {
+        console.error('Erro ao adicionar/atualizar item:', error);
+        showNotification('Erro ao adicionar/atualizar item. Tente novamente', 'error');
+    }
+}
+
+function setupImagePreview() {
+    const imageInput = document.getElementById('item-image');
+    const previewImage = document.getElementById('image-preview');
+
+    imageInput.addEventListener('change', () => {
+        if (imageInput.files.lenght === 0) {
+            previewImage.innerHTML = '';
+            previewImage.classList.add('hidden');
+            return;
+        }
+
+        const file = imageInput.files[0];
+        const reader = new FileReader();
+
+        reader.onload = (e) => {
+            previewImage.innerHTML = `<img src="${e.target.result}" alt="Prévia">`;
+            previewImage.classList.remove('hidden');
+        };
+
+        reader.readAsDataURL(file);
+    })
+}
+
+function handleCategoryFilter(category) {
+    if (state.currentCategory === category) {
+        state.currentCategory = null;
+
+        elements.categoryButton.forEach(btn => {
+            btn.classList.remove('active');
+        });
+    } else {
+        state.currentCategory = category;
+
+        elements.categoryButton.forEach(btn => {
+            btn.classList.remove('active');
+            if (btn.dataset.category === category) {
+                btn.classList.add('active');
+            } else {
+                btn.classList.remove('active');
+            }
+        });
+    }
+
+    loadItems();
+}
+
+function handleSearch(e) {
+    e.preventDefault();
+    state.searchQuery = elements.searchInput.value.trim();
+    loadItems();
+}
+
+function handleConditionFilter() {
+    state.currentCondition = elements.conditionFilter.value;
+
+    applyFilters();
+    updateItemsUI();
+}
+
+function handleSortFilter() {
+    state.currentSort = elements.sortFilter.value;
+
+    applyFilters();
+    updateItemsUI();
+}
+
+//Funções auxiliares para modais
+function openModal(modal) {
+    modal.style.display = 'block';
+}
+
+function closeModal(modal) {
+    modal.style.display = 'none';
+}
+
+function showNotification(message, type = 'info') {
+    const notification = document.createElement('div');
+    notification.className = `notification ${type}`;
+    notification.innerHTML = `
+        <div class="notification-content">
+            <p>${message}</p>
+        </div>
+    `;
+
+    document.body.appendChild(notification);
+
+    setTimeout(() => {
+        notification.classList.add('show');
+    }, 10);
+
+    setTimeout(() => {
+        notification.classList.remove('show');
+        setTimeout(() => {
+            document.body.removeChild(notification);
+        }, 300);
+    }, 3000);
+}
+
+function setupEventListeners() {
+    elements.loginForms.addEventListener('submit', handleLogin);
+    elements.registerForm.addEventListener('submit', handleRegister);
+
+    document.getElementById('go-to-register').addEventListener('click', () => {
+        closeModal(elements.loginModal);
+        openModal(elements.registerModal);
+    });
+
+    document.getElementById('go-to-login').addEventListener('click', () => {
+        closeModal(elements.registerModal);
+        openModal(elements.loginModal);
+    });
+
+    elements.addItemBtn.addEventListener('click', () => {
+        //Resetar formulado e Resetar ID
+        elements.addItemForm.reset();
+        document.getElementById('item-id').value = '';
+        //Resetar preview da imagem
+        document.getElementById('image-preview').innerHTML = '';
+        document.getElementById('image-preview').classList.add('hidden');
+        //Atualzar o título e o botão de submit
+        elements.addItemModal.querySelector('.modal-title').textContent = 'Adicionar Novo Item';
+        elements.addItemModal.querySelector('button[type="submit"]').textContent = 'Adicionar Item';
+
+        openModal(elements.addItemModal);
+    });
+
+    //Form de adicionar/Editar item
+    elements.addItemForm.addEventListener('submit', handleAddEditItem);
+    setupImagePreview();
+    //Pesquisa
+    document.getElementById('search-form').addEventListener('submit', handleSearch);
+    //Filtros de ordenação
+    elements.categoryButton.forEach(btn => {
+        btn.addEventListener('click', () => {
+            handleCategoryFilter(btn.dataset.category);
+        });
+    });
+
+    elements.conditionFilter.addEventListener('change', handleConditionFilter);
+    elements.sortFilter.addEventListener('change', handleSortFilter);
+    //Fechar modais
+    document.querySelectorAll('.close-modal').forEach(btn => {
+        btn.addEventListener('click', () => {
+            closeModal(btn.closest('.modal'));
+        });
+    });
+
+    window.addEventListener('click', (e) => {
+        document.querySelectorAll('.modal').forEach(modal => {
+            if (e.target === modal) {
+                closeModal(modal);
+            }
+        });
+    });
+}
+
+//Iniciar aplicação
+document.addEventListener('DOMContentLoaded', init);
