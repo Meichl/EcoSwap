@@ -2,50 +2,59 @@
 ![PHP](https://img.shields.io/badge/PHP-777BB4?style=for-the-badge&logo=php&logoColor=white)
 ![JavaScript](https://img.shields.io/badge/JavaScript-323330?style=for-the-badge&logo=javascript&logoColor=F7DF1E)
 
-**EcoSwap** é uma aplicação web em desenvolvimento que incentiva o consumo consciente e a reutilização de objetos, permitindo que pessoas cadastrem itens que não usam mais e proponham trocas com outros usuários.
+Tecnologias: PHP | JavaScript | HTML | CSS
 
-Este projeto está sendo construído com foco na prática de desenvolvimento backend, utilizando **PHP** e **JavaScript**.
+EcoSwap é uma aplicação web que promove o consumo consciente e a reutilização de objetos. A plataforma permite que usuários cadastrem itens que não utilizam mais e realizem trocas com outras pessoas da comunidade.
 
----
+✅ Funcionalidades
+Cadastro e autenticação de usuários
 
-## 🚧 Status do Projeto
+Cadastro, edição e listagem de itens para troca
 
-> **Em desenvolvimento (MVP)**  
-> Funcionalidades básicas sendo implementadas:  
-> ✅ Cadastro de usuários  
-> ✅ Cadastro e listagem de itens  
-> ⏳ Solicitação de troca  
-> ⏳ Upload de imagem  
-> ⏳ Sistema de avaliação e histórico  
+Solicitação de trocas entre usuários
 
----
-## 🗂️ Estrutura do Projeto
+Upload de imagens dos itens
+
+Avaliação de usuários e histórico de trocas  
+
+🧱 Estrutura do Projeto  
 
 ecoswap/  
- ├── api/  
- │├── db.php # Conexão e criação do banco  
- │ ├── items.php # Endpoints para itens  
- │ └── users.php # Endpoints para usuários  
- ├── uploads/ # Diretório para imagens  
- ├── index.html # Interface simples para testes  
- └── script.js # Lógica JS para interações  
+├── api/  
+│   ├── config/   
+│   │   └── db_config.php           
+│   ├── controllers/    
+│   │   ├── ItemController.php       
+│   │   └── UserController.php       
+│   ├── models/  
+│   │   ├── Item.php               
+│   │   ├── User.php                
+│   │   └── index.php               
+├── assets/  
+│   ├── css/  
+│   │   └── style.css             
+│   ├── img/  
+│   │   └── logo.png             
+│   └── js/  
+│       ├── components/  
+│       │   ├── Item.js         
+│       │   └── User.js          
+│       └── app.js                
+├── includes/  
+│   ├── footer.php                
+│   └── header.php              
+├── uploads/                        
+├── index.html                       
+└── README.md
 
----
+🚀 Como rodar o projeto
+Clone o repositório:  
+git clone https://github.com/seu-usuario/ecoswap.git  
+Configure o banco de dados em api/config/db_config.php  
 
-## ▶️ Como Executar o Projeto Localmente
+Suba o projeto em um servidor local (ex: XAMPP ou WAMP)  
 
-1. Clone o repositório:  
-   ```bash
-   git clone https://github.com/seuusuario/ecoswap.git
-   cd ecoswap
-Inicie o servidor embutido do PHP:  
-- php -S localhost:8000
-  
-Acesse no navegador:
-http://localhost:8000
+Acesse index.html no navegador  
 
-🎯 Objetivos do Projeto
-- Praticar a criação de APIs REST com PHP puro
-- Trabalhar com banco de dados local (SQLite)
-- Criar uma interface simples de consumo via JavaScript
-- Desenvolver um projeto com impacto social e sustentável
+📌 Observações  
+Esse projeto foi uma excelente oportunidade para consolidar práticas de desenvolvimento backend, integração com frontend e organização modular de código. Toda a lógica foi separada por camadas (controllers, models, API) com foco em manutenibilidade e clareza.
